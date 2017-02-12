@@ -142,15 +142,17 @@ public class MultiThreadedBuilder
                 {
                     break;
                 }
-                final List<MavenProject> newItemsThatCanBeBuilt =
-                    analyzer.markAsFinished( projectBuild.getProject() );
+                final List<MavenProject> newItemsThatCanBeBuilt = analyzer.markAsFinished( projectBuild.getProject() );
                 for ( MavenProject mavenProject : newItemsThatCanBeBuilt )
                 {
-                    ProjectSegment scheduledDependent = projectBuildList.get( mavenProject );
-                    logger.debug( "Scheduling: " + scheduledDependent );
-                    Callable<ProjectSegment> cb =
-                        createBuildCallable( rootSession, scheduledDependent, reactorContext, taskSegment, muxer );
-                    service.submit( cb );
+                    if ( projectBuildList.containsKey( mavenProject ) )
+                    {
+                        ProjectSegment scheduledDependent = projectBuildList.get( mavenProject );
+                        logger.debug( "Scheduling: " + scheduledDependent );
+                        Callable<ProjectSegment> cb =
+                            createBuildCallable( rootSession, scheduledDependent, reactorContext, taskSegment, muxer );
+                        service.submit( cb );
+                    }
                 }
             }
             catch ( InterruptedException e )
